@@ -37,110 +37,20 @@ stages:
                 displayName: Download Artifacts to VM
                 inputs:
                   buildType: 'current'
-                  targetPath: '/tmp/'
+                  targetPath: '/tmp/'              
               - task: Bash@3
                 displayName: Deploy FastAPI App
                 env:
                   CONNECTION_STRING: ${CONNECTION_STRING}
                 inputs:
-                  targetType: inline
+                  targetType: 'inline'
                   script: |
                     set -e
-
-                    echo "=== SYSTEM SETUP (run as root) ==="
-                    sudo bash << 'EOF'
-                    set -e
-
-                    systemctl stop unattended-upgrades || true
-                    systemctl disable unattended-upgrades || true
-
-                    rm -f /var/lib/dpkg/lock-frontend
-                    rm -f /var/lib/dpkg/lock
-
-                    apt-get update
-                    apt-get install -y \
-                      python3 \
-                      python3-pip \
-                      python3-venv \
-                      curl \
-                      gnupg2 \
-                      unixodbc \
-                      unixodbc-dev
-
-                    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
-                      | gpg --dearmor --batch --yes -o /usr/share/keyrings/microsoft.gpg
-                      
-                    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] \
-                    https://packages.microsoft.com/debian/12/prod bookworm main" \
-                    > /etc/apt/sources.list.d/mssql-release.list
-
-                    apt-get update
-                    ACCEPT_EULA=Y apt-get install -y msodbcsql18
-                    EOF
-
-                    echo "=== COPY APP FILES ==="
+                    echo "=== Copy application files ==="
                     mkdir -p /home/adminuser/todo-api
                     cp -r /tmp/Artifact-Backend/* /home/adminuser/todo-api/
-                    cd /home/adminuser/todo-api
-
-                    echo "=== PYTHON VENV ==="
-                    python3 -m venv venv
-                    source venv/bin/activate
-
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-
-                    echo "=== START APP ==="
-                    pkill -f "uvicorn app:app" || true
-
-                    nohup venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port 8000 
-
-              # - task: Bash@3
-              #   displayName: Install Depandency
-              #   env:
-              #     CONNECTION_STRING: ${CONNECTION_STRING}
-              #   inputs:
-              #     targetType: 'inline'
-              #     script: |
-              #       set -e
-              #       echo "=== Stop auto upgrades to avoid apt lock ==="
-              #       sudo systemctl stop unattended-upgrades || true
-              #       sudo systemctl disable unattended-upgrades || true
-              #       echo "=== Install system dependencies ==="
-              #       sudo apt-get update
-              #       sudo apt-get install -y python3 python3-pip python3-venv
-              #       sudo rm -f /var/lib/dpkg/lock-frontend
-              #       sudo rm -f /var/lib/dpkg/lock
-
-              #       echo "=== Copy application files ==="
-              #       mkdir -p /home/adminuser/todo-api
-              #       cp -r /tmp/Artifact-Backend/* /home/adminuser/todo-api/
-              #       cd /home/adminuser/todo-api   
-
-              #       echo "=== Install MS SQL ODBC Driver ==="                
-              #       sudo apt-get update && apt-get install -y curl gnupg2 unixodbc unixodbc-dev
+                    cd /home/adminuser/todo-api   
                     
-              #       curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg && \
-              #           echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" \
-              #           > sudo tee /etc/apt/sources.list.d/mssql-release.list
-                    
-              #       sudo apt-get update
-              #       sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18                    
-              #       echo "=== Create Python Virtual Environment ==="
-              #       python3 -m venv venv
-              #       source venv/bin/activate
+                    echo "=== Deployment Completed Successfully ==="
 
-              #       echo "=== Install Python dependencies ==="
-              #       pip install --upgrade pip
-              #       pip install -r requirements.txt
-
-              #       echo "=== Stop old uvicorn if running ==="
-              #       pkill -f "uvicorn app:app" || true
-
-              #       echo "=== Start FastAPI with Uvicorn ==="
-              #       nohup venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
-
-              #       echo "=== Deployment Completed Successfully ==="
-
-             
 
