@@ -6,7 +6,7 @@ trigger: none
 pool: Agent_01_Dec2025
 
 variables:
-  - group: TODO_CONNECTION_STRING
+  - group: CONNECTION_STRING
 
 stages:
   - stage: BuildStage
