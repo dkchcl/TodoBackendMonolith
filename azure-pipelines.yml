@@ -41,7 +41,7 @@ stages:
               - task: Bash@3
                 displayName: Deploy FastAPI App
                 env:
-                  CONNECTION_STRING: ${CONNECTION_STRING}
+                  CONNECTION_STRING: $(CONNECTION_STRING)
                 inputs:
                   targetType: 'inline'
                   script: |
