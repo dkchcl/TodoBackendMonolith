@@ -11,6 +11,7 @@ load_dotenv()
 
 connection_string = os.getenv("CONNECTION_STRING")
 # connection_string = "UPDATE CONNECTION STRING HERE"
+conn = pyodbc.connect(connection_string)
 
 app = FastAPI()
 
